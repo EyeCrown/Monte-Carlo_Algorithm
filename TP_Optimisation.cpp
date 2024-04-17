@@ -1,40 +1,44 @@
 
 #include <chrono>
 
+#include "Board.h"
 #include "Game.h"
+#include "OPlayer.h"
 #include "Player.h"
 #include "SetList.h"
 
 int main(int argc, char* argv[])
 {
     std::cout << "Main begin =====================" << std::endl;
-
+    std::chrono::time_point<std::chrono::system_clock> start, end;
     SetList setList = SetList();
 
-    //std::cout << setList.ToString() << std::endl;
 
-    int winP1 = 0;
-    int winP2 = 0;
+    int winP1 = 0, winP2 = 0;
     
-    Player* p1 = new Player(1, setList);
-    Player* p2 = new Player(2, setList);
+    OPlayer* p1 = new OPlayer(setList);
+    OPlayer* p2 = new OPlayer(setList);
     
-    Game* game = new Game(p1, p2);
+    
+    Board* boardGame = new Board();
+    
+    
+    int nbGame = 10;
 
-    int nbGame = 1000;
+    //boardGame->Init(p1, p2);
 
-    std::chrono::time_point<std::chrono::system_clock> start, end;
- 
     start = std::chrono::system_clock::now();
-    for (int i=0; i < nbGame; i++)
+    for (int i=0; i < nbGame/2; i++)
     {
-        Player winner = *game->MakeGame(i%2);
-
-        if (winner._id == 1)
-            winP1++;
-        else
-            winP2++;
+        int winner = boardGame->DoGame(*p1, *p2);
+        winner ? ++winP1 : ++winP2;
     }
+    for (int i=0; i < nbGame/2; i++)
+    {
+        int winner = boardGame->DoGame(*p2, *p1);
+        winner ? ++winP2 : ++winP1;
+    }
+    
     end = std::chrono::system_clock::now();
 
     float rate1 = (float) winP1 / (float) nbGame;

@@ -43,7 +43,7 @@ public:
         std::string text = "==== SetList =============\n";
         for (auto card : AllCards)
         {
-            text += card->ToString() + "\n";
+            text += card.ToString() + "\n";
         }
         text += "   SetList size: " + std::to_string(size) + "\n";
         text += "=======================\n";

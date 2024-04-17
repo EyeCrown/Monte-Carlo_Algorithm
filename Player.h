@@ -66,15 +66,15 @@ public:
         {
             int randID = rand() % setlist.size;
             
-            Card* card = setlist.AllCards[randID];
+            Card card = setlist.AllCards[randID];
 
-            while (ContainCard(*card))
+            while (ContainCard(card))
             {
                 randID = rand() % setlist.size;
                 card = setlist.AllCards[randID];
             }
             
-            _deckComplete->push_back(card);
+            _deckComplete->push_back(&card);
         }
     }
 
@@ -133,7 +133,7 @@ public:
         {
             if (card->_cost == maxCost)
                 cardsAvailable.push_back(*card);
-                indexCards.push_back(card - _hand->begin());
+                //indexCards.push_back(card - _hand->begin());
         }
 
         index = rand() % cardsAvailable.size();
