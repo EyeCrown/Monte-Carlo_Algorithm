@@ -8,7 +8,7 @@
 class SetList
 {
 public:
-    std::vector<Card*> AllCards;
+    std::vector<Card> AllCards;
     int size;
 
     SetList()
@@ -27,8 +27,8 @@ public:
         {
             for (int def=1; def <= maxDef; def++)
             {
-                Card* card = new Card(atk, def);
-                card->ID = id++;
+                Card card = Card(atk, def);
+                card.ID = id++;
                 AllCards.push_back(card);
                 //AllCards[id] = card;
             }
@@ -50,5 +50,4 @@ public:
 
         return text;
     }
-    
 };
