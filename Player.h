@@ -10,14 +10,16 @@
 class Player
 {
 public:
+    int ID;
     std::vector<Card>* _Deck;
     SetList* _setList;
 
     Card cardRemoved;
     int indexCardRemoved;
 
-    Player(SetList* set_list)
+    Player(SetList* set_list, int id)
     {
+        ID = id;
         _Deck = new std::vector<Card>;
         _setList = set_list;
         GenerateDeck();
@@ -95,12 +97,12 @@ public:
 
 
     // CVS
-    void WriteAmountOfCardsPerCostHistogram(std::vector<Card> deckData) {
-        csvfile csv("AmountOfCardsPerCostData.csv");
+    void WriteAmountOfCardsPerCostHistogram(std::string filename) {
+        csvfile csv(filename);
         csv << "Cost" << "Amount of cards" << endrow;
         std::vector<int> costForEachCard = std::vector<int>();
-        for (int i = 0; i < deckData.size(); i++) {
-            costForEachCard.push_back(deckData[i]._cost);
+        for (int i = 0; i < _Deck->size(); i++) {
+            costForEachCard.push_back(_Deck->at(i)._cost);
         }
         int max_value = *max_element(costForEachCard.begin(), costForEachCard.end());
         std::vector<int> amountOfCards = std::vector<int>();

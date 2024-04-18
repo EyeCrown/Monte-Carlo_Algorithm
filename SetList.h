@@ -30,7 +30,6 @@ public:
                 Card card = Card(atk, def);
                 card.ID = id++;
                 AllCards.push_back(card);
-                //AllCards[id] = card;
             }
             --maxDef;
         }
