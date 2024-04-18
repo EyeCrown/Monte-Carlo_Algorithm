@@ -1,5 +1,7 @@
 ﻿#pragma once
-#include "OPlayer.h"
+#include <random>
+
+#include "Player.h"
 
 static int BASE_HP = 20;
 static int BASE_MANA = 0;
@@ -75,8 +77,8 @@ public:
     std::vector<Card>* _DeckPlayer1;
     std::vector<Card>* _DeckPlayer2;
 
-    OPlayer* oplayer1;
-    OPlayer* oplayer2;
+    Player* player1;
+    Player* player2;
     
     PlayerData* _player1;
     PlayerData* _player2;
@@ -85,16 +87,21 @@ public:
 
     
     // Init game
-    void Init(OPlayer& player1, OPlayer& player2)
+    void Init(Player& player1, Player& player2)
     {
         _player1 = new PlayerData(player1._Deck);
         _player2 = new PlayerData(player2._Deck);
+
+        std::random_device rd;
+        std::mt19937 g(rd()); 
+        std::shuffle(_player1->deck.begin(), _player1->deck.end(), g);
+        std::shuffle(_player2->deck.begin(), _player2->deck.end(), g);
     }
 
     // Start Game
 
     // Game Logic
-    int DoGame(OPlayer& player1, OPlayer& player2)
+    int DoGame(Player& player1, Player& player2)
     {
         Init(player1, player2);
         

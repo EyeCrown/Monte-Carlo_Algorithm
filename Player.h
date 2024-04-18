@@ -1,192 +1,120 @@
 ﻿#pragma once
-#include <algorithm>
-#include <complex.h>
-#include <random>
 #include <vector>
 
 #include "Card.h"
+#include "csvfile.h"
 #include "SetList.h"
 
 #define SIZE_DECK 30
 
 class Player
 {
-private:
-    int sizeDeck = 30;
-    
 public:
-    int _id;
-    
-    int _hp;
-    int _mana;
+    std::vector<Card>* _Deck;
+    SetList* _setList;
 
-    std::vector<Card*>* _deckComplete;
-    
-    std::vector<Card>* _deck;
-    std::vector<Card>* _hand;
-    std::vector<Card>* _board;
+    Card cardRemoved;
+    int indexCardRemoved;
 
-    Player(int id, SetList set_list)
+    Player(SetList* set_list)
     {
-        _id = id;
-        _hp = 0;
-        _mana = 0;
+        _Deck = new std::vector<Card>;
+        _setList = set_list;
+        GenerateDeck();
 
-        _deckComplete = new std::vector<Card*>;
-        _deck = new std::vector<Card>;
-        _hand = new std::vector<Card>;
-        _board = new std::vector<Card>;
-
-        GenerateDeck(set_list);
-        
+        cardRemoved = _Deck->at(0);
+        indexCardRemoved = 0;
     }
-    
-    void Initilaze(int hp, int mana)
-    {
-        _hp = hp;
-        _mana = mana;
-        for (int i=0; i<_deckComplete->size(); i++)  
-            _deck->push_back(*_deckComplete->at(i));
-        
-        _hand->clear();
-        _board->clear();
 
-        std::random_device rd;
-        std::mt19937 g(rd()); 
-        std::shuffle(_deck->begin(), _deck->end(), g);
-
-        for (int i=0; i<4; i++)
-            DrawCard();
-        
-    }
-    
-    void GenerateDeck(SetList setlist)
+    void GenerateDeck()
     {
-        for (int i=0; i<sizeDeck; i++)
+        for (int i=0; i<SIZE_DECK; i++)
         {
-            int randID = rand() % setlist.size;
+            int randID = rand() % _setList->size;
             
-            Card card = setlist.AllCards[randID];
+            Card card = _setList->AllCards[randID];
 
             while (ContainCard(card))
             {
-                randID = rand() % setlist.size;
-                card = setlist.AllCards[randID];
+                randID = rand() % _setList->size;
+                card = _setList->AllCards[randID];
             }
             
-            _deckComplete->push_back(&card);
+            _Deck->push_back(card);
         }
     }
 
     bool ContainCard(Card card)
     {
-        for(int i=0; i<_deck->size(); i++)
+        for(int i=0; i<_Deck->size(); i++)
         {
-            if (card.ID == _deck->at(i).ID)
+        if (card.ID == _Deck->at(i).ID)
                 return true;
         }
         return false;
     }
 
-    std::string ToString()
+    int numberCardinDeck(Card card)
     {
-        std::string text = "==== Player's deck =============\n";
-        for (std::vector<Card>::const_iterator card = _deck->begin(); card != _deck->end(); ++card)
+        int nb = 0;
+        for(int i=0; i<_Deck->size(); i++)
         {
-            text += card->ToString() + "\n";
+            if (card.ID == _Deck->at(i).ID)
+                nb++;
         }
-        text += "   Deck size: " + std::to_string(_deck->size()) + "\n";
-        text += "=======================\n";
 
-        return text;
+        return nb;
     }
     
-    void DrawCard()
+    //Change One Card
+    void ChangeOneCard()
     {
-        _hand->push_back(_deck->front());
-        _deck->pop_back();
-    }
+        int randID = rand() % _setList->size;
+        
+        indexCardRemoved = rand() % _Deck->size();
+        cardRemoved = _Deck->at(indexCardRemoved);
+        
+        Card newCard = _setList->AllCards[randID];
 
-    bool CanPlay()
-    {
-        for (std::vector<Card>::const_iterator card = _hand->begin(); card != _hand->end(); ++card)
+        while (numberCardinDeck(newCard) >= 2)
         {
-            if(_mana - card->_cost >= 0)
-                return true;
-        }
-        return false;
-    }
-
-    void PlayCard()
-    {
-        int index = 0;
-        std::vector<Card> cardsAvailable;
-        std::vector<int> indexCards;
-
-        int maxCost = 0;
-        for (std::vector<Card>::const_iterator card = _hand->begin(); card != _hand->end(); ++card)
-        {
-            if (card->_cost > maxCost)
-                maxCost = card->_cost;
-        }
-        for (std::vector<Card>::const_iterator card = _hand->begin(); card != _hand->end(); ++card)
-        {
-            if (card->_cost == maxCost)
-                cardsAvailable.push_back(*card);
-                //indexCards.push_back(card - _hand->begin());
+            randID = rand() % _setList->size;
+            newCard = _setList->AllCards[randID];
         }
 
-        index = rand() % cardsAvailable.size();
-        Card card = cardsAvailable.at(index);
-
-        //std::cout << "Player " + std::to_string(_id) + " plays card "+ std::to_string(card.ID)+"\n";
-        
-        _mana -= card._cost;
-        
-        _hand->erase( _hand->begin() + indexCards.at(index));
-        _board->push_back(card);
+        //std::cout << "Player replace " + cardRemoved.ToString() + " by " + newCard.ToString() + ".\n";
+            
+        _Deck->at(indexCardRemoved) = newCard;
     }
 
-    Card SelectCardToPlay()
+    void UndoChangeOneCard()
     {
-        int index = 0;
-        std::vector<Card> cardsAvailable;
-
-        int maxCost = 0;
-        for (std::vector<Card>::const_iterator card = _hand->begin(); card != _hand->end(); ++card)
-        {
-            if (card->_cost > maxCost)
-                maxCost = card->_cost;
-        }
-        for (std::vector<Card>::const_iterator card = _hand->begin(); card != _hand->end(); ++card)
-        {
-            if (card->_cost == maxCost)
-                cardsAvailable.push_back(*card);
-        }
-
-        index = rand() % cardsAvailable.size();
-        Card card = cardsAvailable.at(index);
-        
-        
-        _mana -= card._cost;
-        
-        _hand->erase( _hand->begin() + index);
-        return card;
+        _Deck->at(indexCardRemoved) = cardRemoved;
     }
 
-    int GetAllDamage()
-    {
-        int damage = 0;
-        for (std::vector<Card>::const_iterator card = _board->begin(); card != _board->end(); ++card)
-        {
-            damage += card->_atk;
+
+
+    // CVS
+    void WriteAmountOfCardsPerCostHistogram(std::vector<Card> deckData) {
+        csvfile csv("AmountOfCardsPerCostData.csv");
+        csv << "Cost" << "Amount of cards" << endrow;
+        std::vector<int> costForEachCard = std::vector<int>();
+        for (int i = 0; i < deckData.size(); i++) {
+            costForEachCard.push_back(deckData[i]._cost);
         }
-        
-        return damage;
+        int max_value = *max_element(costForEachCard.begin(), costForEachCard.end());
+        std::vector<int> amountOfCards = std::vector<int>();
+        for (int i = max_value; i >= 0; --i)
+        {
+            amountOfCards.push_back(std::count(costForEachCard.begin(), costForEachCard.end(), i));
+        }
+        std::reverse(amountOfCards.begin(), amountOfCards.end());
+        for (int i = max_value; i >= 0; --i)
+        {
+            csv << i << amountOfCards[i] << endrow;
+        }
     }
 
-    bool IsAlive()
-    {
-        return _hp > 0 && _deck->size() > 0;
-    }
+    
+    
 };

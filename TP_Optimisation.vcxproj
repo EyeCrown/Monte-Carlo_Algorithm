@@ -155,14 +155,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
-    <ClCompile Include="OPlayer.cpp" />
     <ClCompile Include="TP_Optimisation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
     <ClInclude Include="Card.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="OPlayer.h" />
+    <ClInclude Include="csvfile.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="SetList.h" />
   </ItemGroup>

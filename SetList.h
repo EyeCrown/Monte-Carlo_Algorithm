@@ -50,4 +50,15 @@ public:
 
         return text;
     }
+
+    void WriteSetList()
+    {
+        csvfile csv("SetListData.csv");
+        csv << "Cost" << "Attack" << "Defense" << endrow;
+        std::sort(AllCards.begin(), AllCards.end(), [](Card a, Card b) { return a._cost < b._cost; });
+        for (int i = 0; i < AllCards.size(); i++)
+        {
+            csv << AllCards[i]._cost << AllCards[i]._atk << AllCards[i]._def << endrow;
+        }
+    }
 };
