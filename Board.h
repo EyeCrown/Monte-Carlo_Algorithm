@@ -12,26 +12,28 @@ struct PlayerData
     int hp = 0;
     int mana = 0;
     
-    std::vector<Card> deck;
-    std::vector<Card> hand;
-    std::vector<Card> board;
+    std::vector<Card*> deck;
+    std::vector<Card*> hand[MAX_CARD_COST+1];
+    std::vector<Card*> board;
 
-    PlayerData(std::vector<Card>* playerDeck)
+    PlayerData(std::vector<Card*>* playerDeck)
     {
         this->hp = BASE_HP;
         this->mana = BASE_MANA;
-        for (auto itr = playerDeck->begin(); itr != playerDeck->end(); itr++)
-            deck.push_back(*itr);
-
-        hand.clear();
+        for (int i=0; i<playerDeck->size(); i++)
+            deck.push_back(playerDeck->at(i));
+        for (int i=MIN_CARD_COST; i<=MAX_CARD_COST; i++)
+            if (!hand[i].empty())
+                hand[i].clear();
+        
         board.clear();
     }
 
-    void InitHand()
+    constexpr void InitHand()
     {
         for (int i=0; i<4; i++)
         {
-            this->hand.push_back(deck.back());
+            this->hand[deck.back()->_cost].push_back(deck.back());
             this->deck.pop_back();
         }
     }
@@ -39,46 +41,34 @@ struct PlayerData
     // Draw card
     void DrawCard()
     {
-        int randID = rand() % deck.size();
-        
-        this->hand.push_back(deck.at(randID));
+        const int randID = rand() % deck.size();
+        Card* card = deck.at(randID);
+        hand[card->_cost].push_back(card);
         this->deck.erase(deck.begin() + randID);
     }
 
-    bool CanPlay()
+    void CanPlay_Rec()
     {
-        for (auto itr = hand.begin(); itr != hand.end(); itr++)
+        const int currMana = std::min(mana, MAX_CARD_COST);
+        for (int i = currMana; i>=MIN_CARD_COST; i--)
         {
-            if (mana >= itr->_cost)
-                return true;
+            if(!hand[currMana].empty()) // If can a play then play a card
+            {
+                const int rand_id = rand() % hand[currMana].size();
+                board.push_back(hand[currMana][rand_id]);
+                hand[currMana].erase(hand[currMana].begin()+rand_id);
+                mana -= currMana;
+                //std::cout << "Player plays " << card.ToString() << std::endl;
+                CanPlay_Rec();
+            }
         }
-        return false;
-    }
-    
-    // Play card
-    void PlayCard()
-    {
-        Card card(0, 0, 0, 0, 0, 0, 0);
-        auto itr = hand.begin();
-        
-        for (auto itr = hand.begin(); itr != hand.end(); itr++)
-        {
-            if (itr->_cost <= mana)
-                card = CardWithHigherCost(*itr, card);
-        }
-
-        const auto position = std::find(hand.begin(), hand.end(), card);
-        mana -= position->_cost;
-        board.push_back(*position);
-        hand.erase(position);
     }
 
     void Attack(PlayerData* opponent)
     {
         int sumDamage = 0;
-        for (auto itr = board.begin(); itr != board.end(); itr++)
-            sumDamage += itr->_atk;
-
+        for (int i=0; i<board.size(); i++)
+            sumDamage += board[i]->_atk;
         opponent->hp -= sumDamage;
     }
 };
@@ -88,8 +78,8 @@ class Board
 public:
     std::chrono::time_point<std::chrono::system_clock> start, end;
     
-    std::vector<Card>* _DeckPlayer1;
-    std::vector<Card>* _DeckPlayer2;
+    std::vector<Card>* DeckPlayer1;
+    std::vector<Card>* DeckPlayer2;
 
     Player* player1;
     Player* player2;
@@ -101,47 +91,45 @@ public:
     int nbWinP1;
 
     int poolMana;
+
+    Board(Player* p1, Player* p2)
+    {
+        player1 = p1;
+        player2 = p2;
+    }
     
     // Init game
     void Init(Player& p1, Player& p2)
     {
         _playerData1 = new PlayerData(p1._Deck);
+        _playerData1->InitHand();
         _playerData2 = new PlayerData(p2._Deck);
+        _playerData2->InitHand();
     }
 
     // Start Game
-    int DoLoop(Player* p1, Player* p2, int nbGame, int& totalNbTurn, int& resNbWin)
+    void DoLoop(int nbGame, int& totalNbTurn, int& resNbWin)
     {
-        player1 = p1;
-        player2 = p2;
         nbWinP1 = 0;
-        
-        for (int i=0; i < nbGame/2; i++)
+        for (int i=0; i <= nbGame/2; i++)
         {
-            DoGame(p1, p2);
+            DoGame(player1, player2);
             totalNbTurn += nbTurn;
         }
         for (int i=0; i < nbGame/2; i++)
         {
-            DoGame(p2, p1);
+            DoGame(player2, player1);
             totalNbTurn += nbTurn;
         }
-        resNbWin = nbWinP1;
-
-        return nbWinP1;
+        resNbWin += nbWinP1;
     }
     
     
     // Game Logic
     void DoGame(Player* player1, Player* player2)
     {
+        nbTurn = poolMana = 0;
         Init(*player1, *player2);
-        
-        nbTurn = 0;
-        poolMana = 0;
-        
-        _playerData1->InitHand();
-        _playerData2->InitHand();
         
         while (_playerData1->hp > 0 && _playerData2->hp > 0)
         {
@@ -160,12 +148,16 @@ public:
     // Game turn
     void Turn(PlayerData* player, PlayerData* opponent)
     {
+        //std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
         player->mana = ++poolMana;
         player->DrawCard();
-
-        while (player->CanPlay())
-            player->PlayCard();
-
+        player->CanPlay_Rec();
         player->Attack(opponent);
+        
+        // std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+        // std::cout << std::fixed;
+        // std::cout.precision(7);
+        // std::chrono::duration<double> elapsed_seconds = end - start;
+        // std::cout << "Turn duration time: " << elapsed_seconds.count() << "s |" << std::endl;
     }
 };
