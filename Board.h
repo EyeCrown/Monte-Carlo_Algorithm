@@ -11,8 +11,6 @@ struct PlayerData
 {
     int hp = 0;
     int mana = 0;
-
-    
     
     std::vector<Card> deck;
     std::vector<Card> hand;
@@ -60,12 +58,12 @@ struct PlayerData
     // Play card
     void PlayCard()
     {
-        Card card = *hand.begin();
+        Card card(0, 0, 0, 0, 0, 0, 0);
         auto itr = hand.begin();
         
         for (auto itr = hand.begin(); itr != hand.end(); itr++)
         {
-            if (card._cost <= mana)
+            if (itr->_cost <= mana)
                 card = CardWithHigherCost(*itr, card);
         }
 
@@ -101,7 +99,8 @@ public:
     
     int nbTurn;
     int nbWinP1;
-    
+
+    int poolMana;
     
     // Init game
     void Init(Player& p1, Player& p2)
@@ -111,7 +110,7 @@ public:
     }
 
     // Start Game
-    int DoLoop(Player* p1, Player* p2, int nbGame)
+    int DoLoop(Player* p1, Player* p2, int nbGame, int& totalNbTurn, int& resNbWin)
     {
         player1 = p1;
         player2 = p2;
@@ -120,13 +119,14 @@ public:
         for (int i=0; i < nbGame/2; i++)
         {
             DoGame(p1, p2);
-            //sumTurns += boardGame->nbTurn;
+            totalNbTurn += nbTurn;
         }
         for (int i=0; i < nbGame/2; i++)
         {
             DoGame(p2, p1);
-            //sumTurns += boardGame->nbTurn;
+            totalNbTurn += nbTurn;
         }
+        resNbWin = nbWinP1;
 
         return nbWinP1;
     }
@@ -138,41 +138,29 @@ public:
         Init(*player1, *player2);
         
         nbTurn = 0;
-
+        poolMana = 0;
+        
         _playerData1->InitHand();
         _playerData2->InitHand();
-
-       
-        //start = std::chrono::system_clock::now();
+        
         while (_playerData1->hp > 0 && _playerData2->hp > 0)
         {
             if(_playerData1->hp > 0)
                 Turn(_playerData1, _playerData2);
-            else
-                return 0;
-            
             if (_playerData2->hp > 0)
                 Turn(_playerData2, _playerData1);
-            else
-                return 1;
+            
             nbTurn++;
         }
-        // end = std::chrono::system_clock::now();
-        // std::chrono::duration<double> elapsed_seconds = end - start;
-        // std::cout << "Duration game " << elapsed_seconds.count() << " s" << std::endl;
         
-        if (_playerData1->hp > 0 && player1->ID == 1)
-            nbWinP1++;
-
-        if (_playerData2->hp > 0 && player2->ID == 1)
+        if (_playerData1->hp > 0 && player1->ID == 1 || _playerData2->hp > 0 && player2->ID == 1)
             nbWinP1++;
     }
 
     // Game turn
     void Turn(PlayerData* player, PlayerData* opponent)
     {
-        
-        player->mana++;
+        player->mana = ++poolMana;
         player->DrawCard();
 
         while (player->CanPlay())

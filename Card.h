@@ -13,6 +13,10 @@ public:
 
     int _cost;
 
+    bool _hasTaunt;
+    bool _hasTrample;
+    bool _hasDistortion;
+    bool _hasFirstStrike;
     
     Card()
     {
@@ -20,21 +24,39 @@ public:
         _atk = -999;
         _def = -999;
         _cost = -999;
+        _hasTaunt = false;
+        _hasTrample = false;
+        _hasDistortion = false;
+        _hasFirstStrike = false;
     }
     
-    Card(int atk, int def)
+    Card(int atk, int def, bool taunt, bool trample, bool distortion, bool firstStrike, int id)
     {
-        ID      = 0;
+        ID      = id;
         _atk    = atk;
         _def    = def;
-        _cost   = ceilf((atk + def) / 2);
+        
+        _hasTaunt = taunt;
+        _hasTrample = trample;
+        _hasDistortion = distortion;
+        _hasFirstStrike = firstStrike;
+
+        _cost = ceilf((float)(atk + def) / (float)2 + _hasTaunt * 1.5f + _hasTrample + _hasDistortion + _hasFirstStrike);
         if (_cost == 0)
             _cost = 1;
     }
 
     std::string ToString() const
     {
-        return "|   ID°"+ std::to_string(ID)+"       C:" + std::to_string(_cost) + "   ATK: " + std::to_string(_atk) + "   DEF: "+ std::to_string(_def) + " |";
+        return  " | ID°"            + std::to_string(ID) +
+                " | C:"             + std::to_string(_cost) +
+                " | ATK: "          + std::to_string(_atk) +
+                " | DEF: "          + std::to_string(_def) +
+                " | TAUNT: "        + std::to_string(_hasTaunt) +
+                " | TRAMPLE: "      + std::to_string(_hasTrample) +
+                " | DISTORTION: "   + std::to_string(_hasDistortion) +
+                " | FIRST STRIKE: " + std::to_string(_hasFirstStrike);
+        
     }
 
     friend bool operator==(const Card& lhs, const Card& rhs)

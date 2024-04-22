@@ -84,13 +84,13 @@ public:
             newCard = _setList->AllCards[randID];
         }
 
-        //std::cout << "Player replace " + cardRemoved.ToString() + " by " + newCard.ToString() + ".\n";
-            
+        //std::cout << "Player change " + cardRemoved.ToString() + " at " + std::to_string(indexCardRemoved) + " by "+ newCard.ToString() +".\n";
         _Deck->at(indexCardRemoved) = newCard;
     }
 
     void UndoChangeOneCard()
     {
+        //std::cout << "Player put " + cardRemoved.ToString() + " at " + std::to_string(indexCardRemoved) + " again.\n";
         _Deck->at(indexCardRemoved) = cardRemoved;
     }
 
