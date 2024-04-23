@@ -8,8 +8,8 @@
 #include "Player.h"
 #include "SetList.h"
 
-int nbGame = 1000, nbLoop = 1000, winP1 = 0, totalWin = 0, lastWinP1 = 0, avgNbTurn = 0;
-const int nbThreads = 4;
+int nbGame = 1, nbLoop = 1, winP1 = 0, totalWin = 0, lastWinP1 = 0, avgNbTurn = 0;
+const int nbThreads = 1;
 
 std::string foldername = "";//"/csv/";
 

@@ -14,7 +14,7 @@ struct PlayerData
     
     std::vector<Card*> deck;
     std::vector<Card*> hand[MAX_CARD_COST+1];
-    std::vector<Card*> board;
+    std::vector<std::pair<int, Card*>> board;
 
     PlayerData(std::vector<Card*>* playerDeck)
     {
@@ -27,6 +27,7 @@ struct PlayerData
                 hand[i].clear();
         
         board.clear();
+        InitHand();
     }
 
     constexpr void InitHand()
@@ -55,7 +56,7 @@ struct PlayerData
             if(!hand[currMana].empty()) // If can a play then play a card
             {
                 const int rand_id = rand() % hand[currMana].size();
-                board.push_back(hand[currMana][rand_id]);
+                board.push_back(std::pair(hand[currMana][rand_id]->_def, hand[currMana][rand_id]));
                 hand[currMana].erase(hand[currMana].begin()+rand_id);
                 mana -= currMana;
                 //std::cout << "Player plays " << card.ToString() << std::endl;
@@ -67,47 +68,51 @@ struct PlayerData
 
     void AttackNoExtraFeature(PlayerData* opponent)
     {
-        int sumDamage = 0;
         for (int i=0; i<board.size(); i++)
-            sumDamage += board[i]->_atk;
-        opponent->hp -= sumDamage;
+            opponent->hp -= board[i].second->_atk;
     }
 
     void AttackOnlyTauntFeature(PlayerData* opponent)
     {
         for (int i=board.size()-1; i>0; i--)
         {
-            Card* card = board.at(i);
-            if (opponent->board.size() > 0)
+            std::pair<int, Card*> card = board.at(i);
+
+            for (int j=0; j>opponent->board.size(); j++)
             {
-                for (int j=opponent->board.size()-1; j>0; j--)
+                std::pair<int, Card*> oppCard = opponent->board.at(i);
+                if (oppCard.second->_hasTaunt && oppCard.first > 0)
                 {
-                    Card* oppCard = opponent->board.at(i);
-
-                    if (oppCard->_hasTaunt)
-                    {
-                        card->_currentDef -= oppCard->_atk;
-                        oppCard->_currentDef -= card->_atk;
-                    }
-                    if (oppCard->_currentDef <= 0)
-                        opponent->board.erase(opponent->board.begin() + j);
-
-                    if (card->_currentDef <= 0)
-                    {
-                        board.erase(opponent->board.begin() + j);
-                        break;
-                    }
-
+                    oppCard.first -= card.second->_atk;
+                    card.first -= oppCard.second->_atk;
                 }
+
+                if (card.first <= 0)
+                    break;  // if card is dead break
             }
-            opponent->hp -= card->_atk;
+
+            if (card.first > 0)
+                opponent->hp -= card.second->_atk;
         }
+
+        ClearDeadCards();
+        opponent->ClearDeadCards();
+    }
+
+    void ClearDeadCards()
+    {
+        if (!board.empty())
+            board.erase(
+                    std::remove_if(board.begin(), board.end(),
+                                   [](const std::pair<int, Card*> card){ return card.first > 0;}),
+                    board.end());
+        ResetHP();
     }
 
     void ResetHP()
     {
         for (int i=0; i<board.size(); i++)
-            board[i]->_currentDef = board[i]->_def;
+            board[i].first = board[i].second->_def;
     }
 };
 
@@ -115,9 +120,6 @@ class Board
 {
 public:
     std::chrono::time_point<std::chrono::system_clock> start, end;
-    
-    std::vector<Card>* DeckPlayer1;
-    std::vector<Card>* DeckPlayer2;
 
     Player* player1;
     Player* player2;
@@ -140,9 +142,9 @@ public:
     void Init(Player& p1, Player& p2)
     {
         _playerData1 = new PlayerData(p1._Deck);
-        _playerData1->InitHand();
+        //_playerData1->InitHand();
         _playerData2 = new PlayerData(p2._Deck);
-        _playerData2->InitHand();
+        //_playerData2->InitHand();
     }
 
     // Start Game
@@ -189,8 +191,7 @@ public:
         player->mana = ++poolMana;
         player->DrawCard();
         player->CanPlay_Rec();
-        player->AttackNoExtraFeature(opponent);
-        //player->AttackOnlyTauntFeature(opponent);
-
+        //player->AttackNoExtraFeature(opponent);
+        player->AttackOnlyTauntFeature(opponent);
     }
 };
