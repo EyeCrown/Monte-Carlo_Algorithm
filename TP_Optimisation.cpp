@@ -8,11 +8,20 @@
 #include "Player.h"
 #include "SetList.h"
 
-
-
 int nbGame = 1000, nbLoop = 1000, winP1 = 0, totalWin = 0, lastWinP1 = 0, avgNbTurn = 0;
 const int nbThreads = 4;
 
+std::string foldername = "";//"/csv/";
+
+void WriteWinRate(std::string filename, float* winRateArray)
+{
+    csvfile csv(filename);
+    csv << "Win rate" << endrow;
+    for (int i = 0; i < nbLoop; i++)
+    {
+        csv << winRateArray[i] << endrow;
+    }
+}
 
 void DoLoop(Board* board, int nbOfGame)
 {
@@ -33,9 +42,11 @@ int main(int argc, char* argv[])
         boards[i] = new Board(p1, p2);
     std::vector<std::thread> threads;
 
-    p1->WriteAmountOfCardsPerCostHistogram("/csv/AmountOfCardsPerCostDataBegin.csv");
-    p1->WriteDeck("/csv/DeckBegin.csv");
-    
+    p1->WriteAmountOfCardsPerCostHistogram(foldername + "AmountOfCardsPerCostDataBegin.csv");
+    p1->WriteDeck(foldername + "DeckBegin.csv");
+
+    float winRateArray[nbLoop];
+
     for (int loop=0; loop < nbLoop; loop++)
     {
         avgNbTurn = 0;
@@ -49,7 +60,6 @@ int main(int argc, char* argv[])
             th.join();
 
         std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
-        
         if (winP1 > lastWinP1)
             lastWinP1 = winP1;
         else
@@ -59,13 +69,15 @@ int main(int argc, char* argv[])
         totalWin += winP1;
         float rate = (float) winP1 / (float) nbGame;
         float lastRate = (float) lastWinP1 / (float) nbGame;
-        
+
+        winRateArray[loop] = rate;
+
         std::chrono::duration<double> elapsed_seconds = end - start;
         all_duration += elapsed_seconds;
 
         threads.clear();
         
-        if (true)
+        if (false)
         {
             std::cout << std::fixed;
             std::cout.precision(2);
@@ -76,22 +88,18 @@ int main(int argc, char* argv[])
             std::cout << "| Avg nb turn: " << (float)avgNbTurn/(float)nbGame << std::endl;
         }
     }
-    
-    p1->WriteAmountOfCardsPerCostHistogram("/csv/AmountOfCardsPerCostDataEnd.csv");
-    p1->WriteDeck("/csv/DeckEnd.csv");
+
+    p1->WriteAmountOfCardsPerCostHistogram(foldername + "AmountOfCardsPerCostDataEnd.csv");
+    p1->WriteDeck(foldername + "DeckEnd.csv");
+
+
+    WriteWinRate(foldername + "WinRate.csv", winRateArray);
 
     std::cout << "Total duration: " << all_duration.count()  << "s." << std::endl;
-
     float rate = (float) totalWin / (float) (nbGame * nbLoop);
-
     std::cout << "Final win rate: " << rate << "." << std::endl;
     
     return 0;
 }
 
-void WriteWinRate()
-{
-    csvfile csv("Winrate.csv");
 
-    
-}

@@ -18,7 +18,7 @@ public:
     {
         CreateAllCards();
         SortCards();
-        WriteSetList();
+        //WriteSetList();
         //std::cout << ToString() << std::endl;
     }
     

@@ -10,6 +10,7 @@ public:
     
     int _atk;
     int _def;
+    int _currentDef;
 
     int _cost;
 
@@ -20,14 +21,8 @@ public:
     
     Card()
     {
-        ID = -999;
-        _atk = -999;
-        _def = -999;
-        _cost = -999;
-        _hasTaunt = false;
-        _hasTrample = false;
-        _hasDistortion = false;
-        _hasFirstStrike = false;
+        ID = _atk = _def = _currentDef = _cost = -999;
+        _hasTaunt = _hasTrample = _hasDistortion = _hasFirstStrike = false;
     }
     
     Card(int atk, int def, bool taunt, bool trample, bool distortion, bool firstStrike, int id)
@@ -35,7 +30,7 @@ public:
         ID      = id;
         _atk    = atk;
         _def    = def;
-        
+        _currentDef = _def;
         _hasTaunt = taunt;
         _hasTrample = trample;
         _hasDistortion = distortion;

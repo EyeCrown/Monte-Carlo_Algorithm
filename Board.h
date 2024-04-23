@@ -60,16 +60,54 @@ struct PlayerData
                 mana -= currMana;
                 //std::cout << "Player plays " << card.ToString() << std::endl;
                 CanPlay_Rec();
+                break;
             }
         }
     }
 
-    void Attack(PlayerData* opponent)
+    void AttackNoExtraFeature(PlayerData* opponent)
     {
         int sumDamage = 0;
         for (int i=0; i<board.size(); i++)
             sumDamage += board[i]->_atk;
         opponent->hp -= sumDamage;
+    }
+
+    void AttackOnlyTauntFeature(PlayerData* opponent)
+    {
+        for (int i=board.size()-1; i>0; i--)
+        {
+            Card* card = board.at(i);
+            if (opponent->board.size() > 0)
+            {
+                for (int j=opponent->board.size()-1; j>0; j--)
+                {
+                    Card* oppCard = opponent->board.at(i);
+
+                    if (oppCard->_hasTaunt)
+                    {
+                        card->_currentDef -= oppCard->_atk;
+                        oppCard->_currentDef -= card->_atk;
+                    }
+                    if (oppCard->_currentDef <= 0)
+                        opponent->board.erase(opponent->board.begin() + j);
+
+                    if (card->_currentDef <= 0)
+                    {
+                        board.erase(opponent->board.begin() + j);
+                        break;
+                    }
+
+                }
+            }
+            opponent->hp -= card->_atk;
+        }
+    }
+
+    void ResetHP()
+    {
+        for (int i=0; i<board.size(); i++)
+            board[i]->_currentDef = board[i]->_def;
     }
 };
 
@@ -148,16 +186,11 @@ public:
     // Game turn
     void Turn(PlayerData* player, PlayerData* opponent)
     {
-        //std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
         player->mana = ++poolMana;
         player->DrawCard();
         player->CanPlay_Rec();
-        player->Attack(opponent);
-        
-        // std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
-        // std::cout << std::fixed;
-        // std::cout.precision(7);
-        // std::chrono::duration<double> elapsed_seconds = end - start;
-        // std::cout << "Turn duration time: " << elapsed_seconds.count() << "s |" << std::endl;
+        player->AttackNoExtraFeature(opponent);
+        //player->AttackOnlyTauntFeature(opponent);
+
     }
 };
