@@ -114,7 +114,6 @@ public:
     {
         csvfile csv(filename);
         csv << "ID°" << "Cost" << "Attack" << "Defense" << "Taunt" << "Trample" << "Distortion" << "First Strike" << endrow;
-        //std::sort(AllCards.begin(), AllCards.end(), [](Card a, Card b) { return a._cost < b._cost; });
         for (int i = 0; i < _Deck->size(); i++)
         {
             csv << _Deck->at(i)->ID << _Deck->at(i)->_cost << _Deck->at(i)->_atk << _Deck->at(i)->_def << _Deck->at(i)->_hasTaunt << _Deck->at(i)->_hasTrample << _Deck->at(i)->_hasDistortion << _Deck->at(i)->_hasFirstStrike  << endrow;

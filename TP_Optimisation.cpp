@@ -33,8 +33,8 @@ int main(int argc, char* argv[])
         boards[i] = new Board(p1, p2);
     std::vector<std::thread> threads;
 
-    p1->WriteAmountOfCardsPerCostHistogram("AmountOfCardsPerCostDataBegin.csv");
-    p1->WriteDeck("DeckBegin.csv");
+    p1->WriteAmountOfCardsPerCostHistogram("/csv/AmountOfCardsPerCostDataBegin.csv");
+    p1->WriteDeck("/csv/DeckBegin.csv");
     
     for (int loop=0; loop < nbLoop; loop++)
     {
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 
         threads.clear();
         
-        if (false)
+        if (true)
         {
             std::cout << std::fixed;
             std::cout.precision(2);
@@ -77,8 +77,8 @@ int main(int argc, char* argv[])
         }
     }
     
-    p1->WriteAmountOfCardsPerCostHistogram("AmountOfCardsPerCostDataEnd.csv");
-    p1->WriteDeck("DeckEnd.csv");
+    p1->WriteAmountOfCardsPerCostHistogram("/csv/AmountOfCardsPerCostDataEnd.csv");
+    p1->WriteDeck("/csv/DeckEnd.csv");
 
     std::cout << "Total duration: " << all_duration.count()  << "s." << std::endl;
 
@@ -88,11 +88,6 @@ int main(int argc, char* argv[])
     
     return 0;
 }
-
-
-
-
-
 
 void WriteWinRate()
 {
