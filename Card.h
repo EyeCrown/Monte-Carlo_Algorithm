@@ -43,14 +43,14 @@ public:
 
     std::string ToString() const
     {
-        return  "\n | ID°"            + std::to_string(ID) +
+        return  " | ID°"            + std::to_string(ID) +
                 " | C:"             + std::to_string(_cost) +
                 " | ATK: "          + std::to_string(_atk) +
                 " | DEF: "          + std::to_string(_def) +
                 " | TAUNT: "        + std::to_string(_hasTaunt) +
                 " | TRAMPLE: "      + std::to_string(_hasTrample) +
                 " | DISTORTION: "   + std::to_string(_hasDistortion) +
-                " | FST STRIKE: "   + std::to_string(_hasFirstStrike) + "\n";
+                " | FST STRIKE: "   + std::to_string(_hasFirstStrike) + "   |";
         
     }
 

@@ -8,11 +8,15 @@
 #include "Player.h"
 #include "SetList.h"
 
-int nbGame = 1, nbLoop = 1, winP1 = 0, totalWin = 0, lastWinP1 = 0, avgNbTurn = 0;
-const int nbThreads = 1;
+// ne pas tester avec 1 seule game parce que chiant
+int nbGame = 1000, nbLoop = 1000, winP1 = 0, totalWin = 0, lastWinP1 = 0, avgNbTurn = 0;
+const int nbThreads = 2;
 
 std::string foldername = "";//"/csv/";
 
+/*
+ * Write CSV file with winrate
+ */
 void WriteWinRate(std::string filename, float* winRateArray)
 {
     csvfile csv(filename);
@@ -58,13 +62,12 @@ int main(int argc, char* argv[])
             threads.push_back(std::thread(DoLoop, boards[i], nbGame/nbThreads));
         for (auto &th : threads)
             th.join();
-
         std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+
         if (winP1 > lastWinP1)
             lastWinP1 = winP1;
         else
             p1->UndoChangeOneCard();
-        
         
         totalWin += winP1;
         float rate = (float) winP1 / (float) nbGame;
@@ -76,8 +79,8 @@ int main(int argc, char* argv[])
         all_duration += elapsed_seconds;
 
         threads.clear();
-        
-        if (false)
+
+        if (true)
         {
             std::cout << std::fixed;
             std::cout.precision(2);
@@ -91,7 +94,6 @@ int main(int argc, char* argv[])
 
     p1->WriteAmountOfCardsPerCostHistogram(foldername + "AmountOfCardsPerCostDataEnd.csv");
     p1->WriteDeck(foldername + "DeckEnd.csv");
-
 
     WriteWinRate(foldername + "WinRate.csv", winRateArray);
 

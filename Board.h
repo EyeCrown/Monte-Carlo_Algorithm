@@ -59,7 +59,7 @@ struct PlayerData
                 board.push_back(std::pair(hand[currMana][rand_id]->_def, hand[currMana][rand_id]));
                 hand[currMana].erase(hand[currMana].begin()+rand_id);
                 mana -= currMana;
-                //std::cout << "Player plays " << card.ToString() << std::endl;
+                //std::cout << this << " plays " << board.back().second->ToString() << std::endl;
                 CanPlay_Rec();
                 break;
             }
@@ -74,25 +74,32 @@ struct PlayerData
 
     void AttackOnlyTauntFeature(PlayerData* opponent)
     {
-        for (int i=board.size()-1; i>0; i--)
+        for (int indexPlayer=0; indexPlayer < board.size(); indexPlayer++)
         {
-            std::pair<int, Card*> card = board.at(i);
+            //std::pair<int, Card*> card = board.at(indexPlayer);
 
-            for (int j=0; j>opponent->board.size(); j++)
+            for (int indexOpp=0; indexOpp<opponent->board.size(); indexOpp++)
             {
-                std::pair<int, Card*> oppCard = opponent->board.at(i);
-                if (oppCard.second->_hasTaunt && oppCard.first > 0)
+                //std::pair<int, Card*> oppCard = opponent->board.at(j);
+                if (opponent->board.at(indexOpp).second->_hasTaunt && opponent->board.at(indexOpp).first > 0)
                 {
-                    oppCard.first -= card.second->_atk;
-                    card.first -= oppCard.second->_atk;
+                    opponent->board.at(indexOpp).first -= board.at(indexPlayer).second->_atk;
+//                    if (opponent->board.at(indexOpp).first <= 0)
+//                        std::cout << "Opponent card is killed." << std::endl;
+
+                    board.at(indexPlayer).first -= opponent->board.at(indexOpp).second->_atk;
+                    //std::cout << "Taunt has been used." << std::endl;
                 }
 
-                if (card.first <= 0)
+                if (board.at(indexPlayer).first <= 0)
                     break;  // if card is dead break
             }
 
-            if (card.first > 0)
-                opponent->hp -= card.second->_atk;
+            if (board.at(indexPlayer).first > 0) // if card alive then do damage
+            {
+                opponent->hp -= board.at(indexPlayer).second->_atk;
+                //std::cout << "Card ID°" << std::to_string( board.at(indexPlayer).second->ID) << " deals " << std::to_string(board.at(indexPlayer).second->_atk) << " damage." << std::endl;
+            }
         }
 
         ClearDeadCards();
@@ -102,11 +109,28 @@ struct PlayerData
     void ClearDeadCards()
     {
         if (!board.empty())
-            board.erase(
-                    std::remove_if(board.begin(), board.end(),
-                                   [](const std::pair<int, Card*> card){ return card.first > 0;}),
-                    board.end());
-        ResetHP();
+        {
+            /*board.erase(std::remove_if(board.begin(), board.end(),
+                                       [](const std::pair<int, Card*> card){ return card.first <= 0;}),
+                        board.end());*/
+
+            int i=0;
+            while (i < board.size())
+            {
+                if (board.at(i).first <= 0)
+                {
+                    board.erase(board.begin() + i);
+                }
+                else
+                {
+                    board[i].first = board[i].second->_def;
+                    i++;
+                }
+            }
+
+        }
+
+        //ResetHP();
     }
 
     void ResetHP()
@@ -142,16 +166,14 @@ public:
     void Init(Player& p1, Player& p2)
     {
         _playerData1 = new PlayerData(p1._Deck);
-        //_playerData1->InitHand();
         _playerData2 = new PlayerData(p2._Deck);
-        //_playerData2->InitHand();
     }
 
     // Start Game
     void DoLoop(int nbGame, int& totalNbTurn, int& resNbWin)
     {
         nbWinP1 = 0;
-        for (int i=0; i <= nbGame/2; i++)
+        for (int i=0; i < nbGame/2; i++)
         {
             DoGame(player1, player2);
             totalNbTurn += nbTurn;
@@ -162,22 +184,23 @@ public:
             totalNbTurn += nbTurn;
         }
         resNbWin += nbWinP1;
+
     }
     
     
     // Game Logic
     void DoGame(Player* player1, Player* player2)
     {
-        nbTurn = poolMana = 0;
+        nbTurn = 0, poolMana = 0;
         Init(*player1, *player2);
         
         while (_playerData1->hp > 0 && _playerData2->hp > 0)
         {
+            poolMana++;
             if(_playerData1->hp > 0)
                 Turn(_playerData1, _playerData2);
             if (_playerData2->hp > 0)
                 Turn(_playerData2, _playerData1);
-            
             nbTurn++;
         }
         
@@ -188,7 +211,7 @@ public:
     // Game turn
     void Turn(PlayerData* player, PlayerData* opponent)
     {
-        player->mana = ++poolMana;
+        player->mana = poolMana;
         player->DrawCard();
         player->CanPlay_Rec();
         //player->AttackNoExtraFeature(opponent);

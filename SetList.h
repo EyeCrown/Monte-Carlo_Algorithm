@@ -18,7 +18,7 @@ public:
     {
         CreateAllCards();
         SortCards();
-        //WriteSetList();
+        WriteSetList();
         //std::cout << ToString() << std::endl;
     }
     
@@ -40,18 +40,18 @@ public:
     {
         int id = 0;
 
-        for(int special = 0 ; special < 16; special++)
+        for(int special = 0 ; special < 2; special++)
         {
             for (int attack = 0; attack <= MAX_CARD_COST*2-1; attack++)
             {
                 for (int defence = 1; defence <= MAX_CARD_COST*2; defence++)
                 {
                     bool hasTaunt = (special & 1) != 0;
-                    bool hasDistortion = (special & 2) != 0;
-                    bool hasTrample = (special & 4) != 0;
-                    bool hasFirstStrike = (special & 8) != 0;
+                    bool hasDistortion = 0;//(special & 2) != 0;
+                    bool hasTrample = 0;//(special & 4) != 0;
+                    bool hasFirstStrike = 0;//(special & 8) != 0;
 
-                    if (GetCost(attack,defence,hasTaunt,hasTrample,hasDistortion,hasFirstStrike) <= MAX_CARD_COST)
+                    if (GetCost(attack,defence, hasTaunt, hasTrample, hasDistortion, hasFirstStrike) <= MAX_CARD_COST)
                     {
                         Card card(attack, defence, hasTaunt, hasTrample, hasDistortion, hasFirstStrike, id);
                         AllCards.push_back(card);
