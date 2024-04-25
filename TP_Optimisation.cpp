@@ -9,7 +9,7 @@
 #include "SetList.h"
 
 // ne pas tester avec 1 seule game parce que chiant
-int nbGame = 1000, nbLoop = 1000, winP1 = 0, totalWin = 0, lastWinP1 = 0, avgNbTurn = 0;
+int nbGame = 1000, nbLoop = 2000, winP1 = 0, totalWin = 0, lastWinP1 = 0, avgNbTurn = 0;
 const int nbThreads = 4;
 
 std::string foldername = "";//"/csv/";

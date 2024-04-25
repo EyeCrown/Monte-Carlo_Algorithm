@@ -76,6 +76,7 @@ struct PlayerData
     {
         for (int indexPlayer=0; indexPlayer < board.size(); indexPlayer++)
         {
+            bool canAttackPlayer = true;
             for (int indexOpp=0; indexOpp<opponent->board.size(); indexOpp++)
             {
                 if (opponent->board.at(indexOpp).second->_hasTaunt && opponent->board.at(indexOpp).first > 0)
@@ -83,15 +84,76 @@ struct PlayerData
                     opponent->board.at(indexOpp).first -= board.at(indexPlayer).second->_atk;
                     board.at(indexPlayer).first -= opponent->board.at(indexOpp).second->_atk;
                     //std::cout << "Taunt has been used." << std::endl;
+                    canAttackPlayer = false;
                 }
 
                 if (board.at(indexPlayer).first <= 0)
                     break;  // if card is dead break
             }
 
-            if (board.at(indexPlayer).first > 0) // if card alive then do damage
+            if (canAttackPlayer && board.at(indexPlayer).first > 0) // if card alive then do damage
             {
                 opponent->hp -= board.at(indexPlayer).second->_atk;
+                //std::cout << "Card ID°" << std::to_string( board.at(indexPlayer).second->ID) << " deals " << std::to_string(board.at(indexPlayer).second->_atk) << " damage." << std::endl;
+            }
+        }
+
+        ClearDeadCards();
+        opponent->ClearDeadCards();
+    }
+
+    void AttackAllFeatures(PlayerData* opponent)
+    {
+        for (int indexPlayer=0; indexPlayer < board.size(); indexPlayer++)
+        {
+            std::pair<int, Card*>* card = &board.at(indexPlayer);
+            bool canAttackPlayer = true;
+
+            for (int indexOpp=0; indexOpp<opponent->board.size(); indexOpp++)
+            {
+                std::pair<int, Card*>* oppCard = &opponent->board.at(indexOpp);
+
+                // Taunt & Distortion
+                if (oppCard->second->_hasTaunt &&
+                (!card->second->_hasDistortion || oppCard->second->_hasDistortion && card->second->_hasDistortion))
+                {
+                    // First Strike
+                    if (card->second->_hasFirstStrike && !oppCard->second->_hasFirstStrike)
+                    {
+                        oppCard->first -= card->second->_atk;
+
+                        if (oppCard->first > 0)
+                            card->first -= oppCard->second->_atk;
+                        // Trample
+                        else if (card->second->_hasTrample)
+                            opponent->hp -= abs(oppCard->first);
+                    }
+                    else if (!card->second->_hasFirstStrike && oppCard->second->_hasFirstStrike)
+                    {
+                        card->first -= oppCard->second->_atk;
+                        if (card->first > 0)
+                        {
+                            oppCard->first -= card->second->_atk;
+                            // Trample
+                            if (card->second->_hasTrample && oppCard->first <= 0)
+                                opponent->hp -= abs(oppCard->first);
+                        }
+                    }
+                    else
+                    {
+                        oppCard->first -= card->second->_atk;
+                        card->first -= oppCard->second->_atk;
+                    }
+                    canAttackPlayer = false;
+                }
+
+                if (card->first <= 0)
+                    break;  // if card is dead break
+            }
+
+            if (canAttackPlayer && card->first > 0) // if card alive then do damage
+            {
+                opponent->hp -= card->second->_atk;
                 //std::cout << "Card ID°" << std::to_string( board.at(indexPlayer).second->ID) << " deals " << std::to_string(board.at(indexPlayer).second->_atk) << " damage." << std::endl;
             }
         }
@@ -196,6 +258,6 @@ public:
         player->DrawCard();
         player->CanPlay_Rec();
         //player->AttackNoExtraFeature(opponent);
-        player->AttackOnlyTauntFeature(opponent);
+        player->AttackAllFeatures(opponent);
     }
 };
