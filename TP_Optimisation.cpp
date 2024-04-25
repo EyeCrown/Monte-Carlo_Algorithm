@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
             th.join();
         std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
 
-        if (winP1 > lastWinP1)
+        if (winP1 >= lastWinP1)
             lastWinP1 = winP1;
         else
             p1->UndoChangeOneCard();
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 
         threads.clear();
 
-        if (false)
+        if (true)
         {
             std::cout << std::fixed;
             std::cout.precision(2);

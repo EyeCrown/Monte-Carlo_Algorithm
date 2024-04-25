@@ -258,6 +258,7 @@ public:
         player->DrawCard();
         player->CanPlay_Rec();
         //player->AttackNoExtraFeature(opponent);
+        //player->AttackNoExtraFeature(opponent);
         player->AttackAllFeatures(opponent);
     }
 };
