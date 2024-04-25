@@ -10,20 +10,20 @@
 
 // ne pas tester avec 1 seule game parce que chiant
 int nbGame = 1000, nbLoop = 1000, winP1 = 0, totalWin = 0, lastWinP1 = 0, avgNbTurn = 0;
-const int nbThreads = 2;
+const int nbThreads = 4;
 
 std::string foldername = "";//"/csv/";
 
 /*
  * Write CSV file with winrate
  */
-void WriteWinRate(std::string filename, float* winRateArray)
+void WriteWinRate(std::string filename, float* winRateArray, float* avgNbTurnArray)
 {
     csvfile csv(filename);
-    csv << "Win rate" << endrow;
+    csv << "Iteration" << "Win rate" << "Avg nb turn" << endrow;
     for (int i = 0; i < nbLoop; i++)
     {
-        csv << winRateArray[i] << endrow;
+        csv << i+1 << winRateArray[i] << avgNbTurnArray[i] << endrow;
     }
 }
 
@@ -34,6 +34,8 @@ void DoLoop(Board* board, int nbOfGame)
 
 int main(int argc, char* argv[])
 {
+    std::chrono::time_point<std::chrono::system_clock> startProgram = std::chrono::system_clock::now();
+
     srand(time(nullptr));
     std::chrono::duration<double> all_duration = std::chrono::duration<double>::zero();
 
@@ -50,6 +52,7 @@ int main(int argc, char* argv[])
     p1->WriteDeck(foldername + "DeckBegin.csv");
 
     float winRateArray[nbLoop];
+    float avgNbTurnArray[nbLoop];
 
     for (int loop=0; loop < nbLoop; loop++)
     {
@@ -73,14 +76,15 @@ int main(int argc, char* argv[])
         float rate = (float) winP1 / (float) nbGame;
         float lastRate = (float) lastWinP1 / (float) nbGame;
 
-        winRateArray[loop] = rate;
+        winRateArray[loop] = winP1;
+        avgNbTurnArray[loop] = (int) avgNbTurn/nbGame;
 
         std::chrono::duration<double> elapsed_seconds = end - start;
         all_duration += elapsed_seconds;
 
         threads.clear();
 
-        if (true)
+        if (false)
         {
             std::cout << std::fixed;
             std::cout.precision(2);
@@ -95,12 +99,15 @@ int main(int argc, char* argv[])
     p1->WriteAmountOfCardsPerCostHistogram(foldername + "AmountOfCardsPerCostDataEnd.csv");
     p1->WriteDeck(foldername + "DeckEnd.csv");
 
-    WriteWinRate(foldername + "WinRate.csv", winRateArray);
+    WriteWinRate(foldername + "WinRate.csv", winRateArray, avgNbTurnArray);
 
-    std::cout << "Total duration: " << all_duration.count()  << "s." << std::endl;
+    std::cout << "Total loop duration: " << all_duration.count()  << "s." << std::endl;
     float rate = (float) totalWin / (float) (nbGame * nbLoop);
     std::cout << "Final win rate: " << rate << "." << std::endl;
-    
+
+    std::chrono::time_point<std::chrono::system_clock> endProgram = std::chrono::system_clock::now();
+    std::chrono::duration<double> durationProgram = endProgram - startProgram;
+    std::cout << "Program duration: " << durationProgram.count()  << "s." << std::endl;
     return 0;
 }
 

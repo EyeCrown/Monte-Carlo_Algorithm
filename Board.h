@@ -76,17 +76,11 @@ struct PlayerData
     {
         for (int indexPlayer=0; indexPlayer < board.size(); indexPlayer++)
         {
-            //std::pair<int, Card*> card = board.at(indexPlayer);
-
             for (int indexOpp=0; indexOpp<opponent->board.size(); indexOpp++)
             {
-                //std::pair<int, Card*> oppCard = opponent->board.at(j);
                 if (opponent->board.at(indexOpp).second->_hasTaunt && opponent->board.at(indexOpp).first > 0)
                 {
                     opponent->board.at(indexOpp).first -= board.at(indexPlayer).second->_atk;
-//                    if (opponent->board.at(indexOpp).first <= 0)
-//                        std::cout << "Opponent card is killed." << std::endl;
-
                     board.at(indexPlayer).first -= opponent->board.at(indexOpp).second->_atk;
                     //std::cout << "Taunt has been used." << std::endl;
                 }
@@ -110,10 +104,6 @@ struct PlayerData
     {
         if (!board.empty())
         {
-            /*board.erase(std::remove_if(board.begin(), board.end(),
-                                       [](const std::pair<int, Card*> card){ return card.first <= 0;}),
-                        board.end());*/
-
             int i=0;
             while (i < board.size())
             {
@@ -127,16 +117,7 @@ struct PlayerData
                     i++;
                 }
             }
-
         }
-
-        //ResetHP();
-    }
-
-    void ResetHP()
-    {
-        for (int i=0; i<board.size(); i++)
-            board[i].first = board[i].second->_def;
     }
 };
 

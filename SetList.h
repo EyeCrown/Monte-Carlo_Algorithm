@@ -36,11 +36,12 @@ public:
         }
     }
 
-    void CreateAllCards()
+
+    void CreateAllCards(int specialLoop = 16)
     {
         int id = 0;
 
-        for(int special = 0 ; special < 2; special++)
+        for(int special = 0 ; special < specialLoop; special++)
         {
             for (int attack = 0; attack <= MAX_CARD_COST*2-1; attack++)
             {
@@ -60,8 +61,6 @@ public:
                 }
             }
         }
-
-        //Console.WriteLine("Set list: nb cards:" + cards.Count);
     }
 
     void SortCards()
