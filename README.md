@@ -14,12 +14,7 @@ a collectible card game (CCG) such as Magic the Gatering or
 Hearthstone
 - Produce data to analyse the results obtained
 
-This was done in several stages. First of all, we had to develop the card game and its rules.
-and its rules and enable two computer bots to play a game.
-a game. Then we had to enable the bots to play a large number of games
-games by allowing them to modify their deck between each series of games in order to
-improve and optimise their deck. And finally, we had to extend the
-the rules of the game to make it more complex.
+This was done in several stages. Foremost, we had to develop the card game and its rules and enable two computer bots to play a game. Then we had to enable the bots to play a large number of games by allowing them to modify their deck between each series of games in order to improve and optimize their deck. And finally, we had to extend the rules of the game to make it more complex.
 
 ## Personal addition
 
@@ -31,18 +26,12 @@ to increase speed. For example, in the latest version of the project for
 
 ## Results
 
-The project meets the initial objectives we set ourselves. We
-are able to produce several decks and optimise each one. Or
-analyse whether certain cards are too recurrent or not recurrent enough.
-enough.
+The project meets the initial objectives we set ourselves. We are able to produce several decks and optimize each one. Or analyze whether certain cards are too recurrent or not recurrent enough.
 On the other hand, there are several possible areas for improvement:
-- Optimise the Setlist itself by counting when cards leave or join the deck in order to
+- Optimize the Set list itself by counting when cards leave or join the deck in order to
 join the deck to identify the best and worst cards.
-- Optimise the deck against several different decks, themselves
-optimised. This could be done using multithreading, for example.
-for example.
+- Optimize the deck against several different decks, themselves optimized. This could be done using multithreading, for example.
 Unfortunately, these improvements could not be implemented due to a lack of time.
-lack of time.
 
 ---
 
